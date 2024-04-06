@@ -62,7 +62,7 @@ vector<string> SplitIntoWordsNoStop(const string& text, const set<string>& stop_
     return words;
 }
 //Возвращает vector vector'ов документов без стоп-слов
-void AddDocument(vector<pair<int,vector<string>>>& documents, const set<string>& stop_words, int id, const string& document) {
+void AddDocument(vector<pair<int,vector<string>>>& documents, const set<string>& stop_words, const string& document, int id) {
     const vector<string> words = SplitIntoWordsNoStop(document, stop_words);
     documents.push_back(pair<int,vector<string>>{id, words});
 }
@@ -110,7 +110,7 @@ int main() {
     vector<pair<int, vector<string>>> documents;
     const int document_count = ReadLineWithNumber();
     for (int document_id = 0; document_id < document_count; ++document_id) {
-        AddDocument(documents, stop_words, document_id, ReadLine());
+        AddDocument(documents, stop_words, ReadLine(), document_id);
     }
 
     const string query = ReadLine();
