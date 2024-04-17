@@ -133,7 +133,7 @@ class SearchServer {
         void SetStopWords(const string& text){
             for (const string& word : SplitIntoWords(text)) stop_words_.insert(word);
         };
-        vector<Document> FindTopDocuments(const string& raw_query) {
+        vector<Document> FindTopDocuments(const string& raw_query) const {
             const set<string> query_words = ParseQuery(raw_query, stop_words_);
             auto matched_documents = FindAllDocuments(query_words);
 
@@ -156,7 +156,7 @@ SearchServer CreateSearchServer(){
 }
 
 int main() {
-    SearchServer search_server = CreateSearchServer();
+    const SearchServer search_server = CreateSearchServer();
 
     const string query = ReadLine();
     for (auto [document_id, relevance] : search_server.FindTopDocuments(query)) {
