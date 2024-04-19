@@ -45,13 +45,52 @@ vector<string> SplitIntoWords(const string& text){
                 words.push_back(word);
                 word.clear();
             } 
-        } else word +=c;
+        } else {
+            word +=c;
+        }
     }
-    if (!word.empty()) words.push_back(word);
+    if (!word.empty()) {
+        words.push_back(word);
+    }
     return words;
 }
 
 class SearchServer{
+    
+public:
+
+    void SetStopWords(const string& text){
+        for (const string& word:SplitIntoWords(text)) {
+            stop_words_.insert(word);
+        }
+    }
+
+    void AddDocument(int document_id, const string& document){
+        const vector<string> words = SplitIntoWordsNoStop(document);
+        int count_words_documents = words.size();
+        for (const auto& word: words){
+            word_to_document_freqs_[word][document_id]+=1./count_words_documents;    
+        }
+    }
+
+    vector<Document> FindTopDocuments(const string& raw_query) const {
+        const QueryWords query_words = ParseQuery(raw_query);
+        auto matched_documents = FindAllDocuments(query_words);
+        sort(matched_documents.begin(), matched_documents.end(),
+                [](const Document& left, const Document& right){
+                    return left.relevance > right.relevance;
+                }
+            );
+        if (matched_documents.size() > MAX_RESULT_DOCUMENT_COUNT) {
+            matched_documents.resize(MAX_RESULT_DOCUMENT_COUNT);
+        }
+
+        return matched_documents;
+    }
+    void SetCountDocuments(int count_documents){
+        count_documents_ = count_documents;
+    }
+private:
     map<string, map<int, double>> word_to_document_freqs_;
     set<string> stop_words_;
     int count_documents_;
@@ -73,8 +112,12 @@ class SearchServer{
     QueryWords ParseQuery(const string& text) const {
         QueryWords query_words;
         for (const string& word:SplitIntoWordsNoStop(text)){
-            if (word[0] != '-') query_words.plus_word.insert(word);
-            else query_words.minus_word.insert(word.substr(1));
+            if (word[0] != '-') {
+                query_words.plus_word.insert(word);
+            }
+            else {
+                query_words.minus_word.insert(word.substr(1));
+            }
         }
         return query_words;
     }
@@ -101,35 +144,6 @@ class SearchServer{
             matched_documents.push_back({id_documents, relevance_document});
         }
         return matched_documents;
-    } 
-
-    public:
-
-    void SetStopWords(const string& text){
-        for (const string& word:SplitIntoWords(text)) stop_words_.insert(word);
-    }
-
-    void AddDocument(int document_id, const string& document){
-        const vector<string> words = SplitIntoWordsNoStop(document);
-        int count_words_documents = words.size();
-        for (const auto& word: words){
-            word_to_document_freqs_[word][document_id]+=1./count_words_documents;    
-        }
-    }
-
-    vector<Document> FindTopDocuments(const string& raw_query) const {
-        const QueryWords query_words = ParseQuery(raw_query);
-        auto matched_documents = FindAllDocuments(query_words);
-        sort(matched_documents.begin(), matched_documents.end(),
-        [](const Document& left, const Document& right){
-            return left.relevance > right.relevance;
-        });
-        if (matched_documents.size() > MAX_RESULT_DOCUMENT_COUNT) matched_documents.resize(MAX_RESULT_DOCUMENT_COUNT);
-
-        return matched_documents;
-    }
-    void SetCountDocuments(int count_documents){
-        count_documents_ = count_documents;
     }
 };
 
