@@ -9,6 +9,8 @@
 
 using namespace std;
 
+//Поисковый сервер
+
 const int MAX_RESULT_DOCUMENT_COUNT = 5;
 
 struct Document
